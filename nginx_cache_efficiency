@@ -21,10 +21,10 @@ if ($cmd eq 'config') {
 	print("graph_title NGINX Cache Efficiency\n");
 	print "graph_category Nginx\n";
 	print("graph_vlabel This graph shows the cache efficiency\n");
-        print("graph_args --lower-limit 0 --upper-limit 100");
-        print("graph_vlabel %");
-        print("request.label total request hits");
-        print("byte.label total byte hits");
+        print("graph_args --lower-limit 0 --upper-limit 100\n");
+        print("graph_vlabel %\n");
+        print("request.label total request hits\n");
+        print("byte.label total byte hits\n");
 
 	exit(0);
 }
