@@ -1,0 +1,103 @@
+#!/usr/local/bin/perl -w
+#
+# Magic markers:
+#%# family=contrib
+#%# capabilities=
+
+use strict;
+#use lib $ENV{'MUNIN_LIBDIR'};
+#use Munin::Plugin;
+
+use POSIX qw(strftime);
+
+my $logfile = '/usr/mem_disk/upstream-access.log';
+my $logtail = '/usr/local/sbin/logtail';
+#my $offsetfile = "/tmp/offset";
+my $offsetfile = "/usr/local/var/munin/plugin-state/munin-upstream-response-time.offset";
+
+my $cmd = (defined($ARGV[0])) ? $ARGV[0] : '';
+
+(defined($ENV{'logfile'})) and $logfile = $ENV{'logfile'};
+(defined($ENV{'logtail'})) and $logtail = $ENV{'logtail'};
+
+if ($cmd eq 'config') {
+	print("graph_title NGINX upstream response time \n");
+	print("graph_args --lower-limit 0\n");
+	print("graph_args --upper-limit 200\n");
+	print("graph_scale no\n");
+	print "graph_category Nginx\n";
+	print("graph_vlabel response time in milliseconds\n");
+
+	print("cache1.label cache1\n");
+	print("cache1.type GAUGE\n");
+	print("cache1.draw LINE2\n");
+
+	print("cache2.label cache2\n");
+	print("cache2.type GAUGE\n");
+	print("cache2.draw LINE2\n");
+
+	print("cache3.label cache3\n");
+	print("cache3.type GAUGE\n");
+	print("cache3.draw LINE2\n");
+
+	print("cache4.label cache4\n");
+	print("cache4.type GAUGE\n");
+	print("cache4.draw LINE2\n");
+
+	print("cache5.label cache5\n");
+	print("cache5.type GAUGE\n");
+	print("cache5.draw LINE2\n");
+
+
+	exit(0);
+}
+
+open(LOG, "$logtail -f $logfile -o $offsetfile|");
+my @lines = <LOG>;
+close (LOG);
+
+my %response_time;
+
+sub median { 
+	my ($array_ref) = @_; 
+	if (not defined(@$array_ref)) { return 0 };
+	my $count = scalar @$array_ref; 
+	# Sort a COPY of the array, leaving the original untouched 
+	my @array = sort { $a <=> $b } @$array_ref; 
+	if ($count % 2) { 
+		return $array[int($count/2)]; 
+	} else { 
+		return ($array[$count/2] + $array[$count/2 - 1]) / 2; 
+	} 
+} 
+
+sub average {
+        my ($array_ref) = @_;
+	if (not defined(@$array_ref)) { return 0 };
+        my $sum;
+        my $count = scalar @$array_ref;
+        foreach (@$array_ref) { $sum += $_; }
+        return $sum / $count;
+}
+
+foreach (@lines) {
+	chomp;
+	my($ip, $uri, $rt) = split(/\s?,\s?/, $_);
+	next until ($rt ne "-");
+	$ip =~ s/:[0-9]+//;
+	push(@{$response_time{$ip}}, $rt*1000);
+}
+
+#open(DEBUG, ">>", "/tmp/debug.log") or die "Could not open /tmp/debug.log for writing: $!\n";
+
+#print DEBUG strftime("%Y-%m-%d %H:%M ", localtime) ."Median:". median($response_time{'10.13.177.115'}) ."\n";
+#print DEBUG strftime("%Y-%m-%d %H:%M ", localtime) ."Median:". median($response_time{'10.13.177.70'}) ."\n";
+#print DEBUG strftime("%Y-%m-%d %H:%M ", localtime) ."Median:". median($response_time{'10.13.177.71'}) ."\n";
+
+print "cache1.value ". average($response_time{'10.13.177.69'})  ."\n";
+print "cache2.value ". average($response_time{'10.13.177.70'})  ."\n";
+print "cache3.value ". average($response_time{'10.13.177.71'})  ."\n";
+print "cache4.value ". average($response_time{'10.13.177.116'}) ."\n";
+print "cache5.value ". average($response_time{'10.13.177.118'}) ."\n";
+
+exit(0);
