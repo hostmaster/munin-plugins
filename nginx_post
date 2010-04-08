@@ -41,6 +41,6 @@ close (LOG);
 
 my $post_requests = grep( /POST/, @lines);
 
-print "posts.value ". $post_requests  ."\n";
+print "post.value ". $post_requests  ."\n";
 
 exit(0);
