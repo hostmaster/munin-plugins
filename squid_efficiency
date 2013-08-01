@@ -1,4 +1,4 @@
-#!/usr/local/bin/bash
+#!/bin/bash
 #
 # Copyright (C) 2006-2009 Benjamin Schweizer. All rights reserved.
 #
@@ -27,7 +27,7 @@
 #
 # Changes
 # ~~~~~~~
-# 2010-01-20, homyakov: added disk and memory stats
+# 2010-01-20, khomyakov: added disk and memory stats
 # 2009-11-25, volker: added config options and docs
 # 2009-11-19, benjamin: fixed squid3 compatibility, minor rewrite
 # 2006-11-16, benjamin: removed 5 minutes stats, fixed 5% bug
